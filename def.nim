@@ -6,39 +6,53 @@ from std/sequtils import concat, newSeqWith
 from std/parsecsv import CsvParser, open, close, readRow
 from std/terminal import styledWrite, styledWriteLine, fgRed, fgCyan, styleBright, resetAttributes
 
+proc `[]`(b: seq[seq[int]], r, c: int): int {.inline.} =
+    b[r][c]
+
+proc `[]=`(b: var seq[seq[int]], r, c, val: int) {.inline.} =
+    b[r][c] = val
+  
 proc min4(a, b, c, d: int): int {.inline.} =
     min(min(a, b), min(c, d))
 
-proc dldist(s, t: string): int =
-    var dd = newSeqWith(s.len+2, newSeq[int](t.len+2))
-    var cost, i1,j1, db: int
-    var infinity: int = s.len + t.len;
-    var da: array[256, int]
+proc dldist(stringA, stringB: string): int =
+    ## Damerau–Levenshtein distance implementation
+    var last_row: array[256, int] # Holds last row each element was encountered
+    var matrix = newSeqWith(stringA.len + 2, newSeq[int](stringB.len + 2)) # Matrix: (A.len + 2) x (B.len + 2)
+    let max_distance: int = stringA.len + stringB.len; # Used to prevent transpositions for first characters
 
-    dd[0][0] = infinity
-    for i in 0 .. s.len:
-        dd[i+1][1] = i
-        dd[i+1][0] = infinity
+    matrix[0, 0] = max_distance
+    for row in 0 .. stringA.len:
+        matrix[row + 1, 1] = row
+        matrix[row + 1, 0] = max_distance
 
-    for j in 0 .. t.len:
-        dd[1][j+1] = j
-        dd[0][j+1] = infinity
+    for column in 0 .. stringB.len:
+        matrix[1, column + 1] = column
+        matrix[0, column + 1] = max_distance
 
-    for i in 1 .. s.len:
-        db = 0
-        for j in 1 .. t.len:
-            i1 = da[ord(t[j-1])]
-            j1 = db
-            cost = if s[i-1]==t[j-1]: 0 else: 1
-            if(cost==0):
-                db = j
-            dd[i+1][j+1] = min4(dd[i][j]+cost, dd[i+1][j] + 1, dd[i][j+1]+1, dd[i1][j1] + (i-i1-1) + 1 + (j-j1-1))
-        da[ord(s[i-1])] = i
-    cost = dd[s.len+1, t.len+1]
-    return cost
+    # Fill in costs
+    for row in 1 .. stringA.len:
+        var last_match_column = 0                                            # Column of last match on this row
+        for column in 1 .. stringB.len:
+            var last_matching_row = last_row[ord(stringB[column - 1])]           # Last row with matching character
+            var cost = if stringA[row - 1] == stringB[column - 1]: 0 else: 1 # Cost of substitution
+
+            # Compute substring distance
+            matrix[row + 1, column + 1] = min4(
+                matrix[row, column] + cost,    # Substitution
+                matrix[row + 1, column] + 1,   # Addition
+                matrix[row, column + 1] + 1,   # Deletion
+                matrix[last_matching_row, last_match_column] + (row - last_matching_row - 1) + (column - last_match_column - 1) + 1 # Transposition
+            )
+
+            if(cost==0):                       # If there was a match, update last_match_col
+                last_match_column = column
+        last_row[ord(stringA[row - 1])] = row  # Update last row for current character
+    matrix[stringA.len + 1, stringB.len + 1]   # Return last element
 
 proc upTo[T](s: seq[T], size: int): seq[T] =
-    return if s.len == 0: s else: s[0..min(s.len-1, size)] 
+    ## Get up to size elements from a sequence
+    if s.len == 0: s else: s[0..min(s.len-1, size)] 
 
 proc main() =
     const bucket_count = 4
