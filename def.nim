@@ -32,10 +32,10 @@ proc dldist(stringA, stringB: string): int =
 
     # Fill in costs
     for row in 1 .. stringA.len:
-        var last_match_column = 0                                                # Column of last match on this row
+        var last_match_column = 0                                      # Column of last match on this row
         for column in 1 .. stringB.len:
-            var last_matching_row = last_row[ord(stringB[column - 1])]           # Last row with matching character
-            var cost = if stringA[row - 1] == stringB[column - 1]: 0 else: 1 # Cost of substitution
+            var last_matching_row = last_row[ord(stringB[column - 1])] # Last row with matching character
+            var cost = int(stringA[row - 1] != stringB[column - 1])    # Cost of substitution
 
             # Compute substring distance
             matrix[row + 1, column + 1] = min4(
@@ -45,7 +45,7 @@ proc dldist(stringA, stringB: string): int =
                 matrix[last_matching_row, last_match_column] + (row - last_matching_row - 1) + (column - last_match_column - 1) + 1 # Transposition
             )
 
-            if(cost==0):                       # If there was a match, update last_match_col
+            if(cost == 0):                     # If there was a match, update last_match_col
                 last_match_column = column
         last_row[ord(stringA[row - 1])] = row  # Update last row for current character
     matrix[stringA.len + 1, stringB.len + 1]   # Return last element
