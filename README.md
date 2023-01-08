@@ -14,19 +14,33 @@ A terminal dictionary based on the Online Plain Text English Dictionary
 
 (based on the Project Gutenberg Etext of Webster's Unabridged Dictionary, which is based on the 1913 US Webster's Unabridged Dictionary)
 
+[How to Use](#how-to-use) •
+[Building](#building)
+
 </div>
 
-# How to use
+# How to Use
 
 Simply type the command `def` with the word you want defined
+
 ```
 > def nim
 Nim
  1. (v. t.) To take; to steal; to filch.
 ```
+
 If the word is not found, you will get some suggestions for similar words that do exist
+
 ```
 > def nimrod
 No match found.
 Did you mean: Nimmed, Nitro, Nitrol, Ramrod, Aimed, Aired, Bird, Birred, Citron, Dimmed
+```
+
+# Building
+
+Compile using the [Nim compiler](https://nim-lang.org/), and the flags of your choosing. For example
+
+```
+> nim c -d:release def.nim
 ```
