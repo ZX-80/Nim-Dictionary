@@ -32,7 +32,7 @@ proc dldist(stringA, stringB: string): int =
 
     # Fill in costs
     for row in 1 .. stringA.len:
-        var last_match_column = 0                                            # Column of last match on this row
+        var last_match_column = 0                                                # Column of last match on this row
         for column in 1 .. stringB.len:
             var last_matching_row = last_row[ord(stringB[column - 1])]           # Last row with matching character
             var cost = if stringA[row - 1] == stringB[column - 1]: 0 else: 1 # Cost of substitution
